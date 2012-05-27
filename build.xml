@@ -1,0 +1,33 @@
+<project name="casper" default="all" basedir=".">
+
+  <description>
+    Build script for Casper
+  </description>
+
+  <property name="src" value="src"/>
+  <property name="output" value="classes"/>
+  <property name="libs" value="../../vert.x-1.0.final/lib/jars"/>
+
+  <path id="compile-classpath">
+    <fileset dir="${libs}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="init">
+    <!-- Create the time stamp -->
+    <tstamp/>
+  </target>
+
+  <target name="compile" depends="init" description="compile">
+    <mkdir dir="${output}"/>
+    <javac srcdir="${src}" destdir="${output}" classpathref="compile-classpath" debug="on" includeantruntime="false"/>
+  </target>
+
+  <target name="clean" description="clean up">
+    <delete dir="${output}"/>
+  </target>
+
+  <target name="all" depends="compile"/>
+
+</project>
