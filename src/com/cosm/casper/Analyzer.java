@@ -25,6 +25,9 @@ public class Analyzer extends Verticle {
   }
 
   public void start()  {
+    EventBus eb = vertx.eventBus();
+
+    // remove refs to requests more than 30s old
     vertx.setPeriodic(1000, new Handler<Long>() {
       private long firstSec() {
         long now = System.currentTimeMillis();
@@ -42,6 +45,7 @@ public class Analyzer extends Verticle {
       }
     }); 
 
+    // count requests in each state, for each second
     vertx.setPeriodic(1000, new Handler<Long>() {
       private long firstSec() {
         long now = System.currentTimeMillis();
@@ -49,22 +53,33 @@ public class Analyzer extends Verticle {
       }
 
       public void handle(Long timerID) {
+        JsonArray data = new JsonArray();
         long first = firstSec(); 
         for (long sec = first; sec < first + (30 * 1000); sec += 1000) {
+          int active = 0;
+          int done = 0;
           Map<String, JsonObject> secReqs = reqs.get(sec);
-          if (secReqs == null) {
-            System.out.println(sec+" - no reqs"); 
-          } else {
-            System.out.println(sec+":");            
+          if (secReqs != null) {
             for (JsonObject reqInfo: secReqs.values()) {
-              System.out.println(reqInfo.getString("uid"));
+              System.out.println(reqInfo);
+              if (reqInfo.getField("status") == null) {
+                active++;
+              } else {
+                done++;
+              }
             }
           }
+          JsonObject secData = new JsonObject();
+          secData.putNumber("time", sec);
+          secData.putNumber("active", active);
+          secData.putNumber("done", done);
+          data.addObject(secData);
+//          System.out.println(sec+": active:"+active+"  done: "+done);            
         }
+        eb.send("reqs.recent.report", data);
       }
     }); 
 
-    EventBus eb = vertx.eventBus();
 
     eb.registerHandler("reqs.start", new Handler<Message<JsonObject>>() {
       public void handle(Message<JsonObject> msg) {
