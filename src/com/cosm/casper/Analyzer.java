@@ -25,7 +25,7 @@ public class Analyzer extends Verticle {
   }
 
   public void start()  {
-    EventBus eb = vertx.eventBus();
+    final EventBus eb = vertx.eventBus();
 
     // remove refs to requests more than 30s old
     vertx.setPeriodic(1000, new Handler<Long>() {
@@ -74,12 +74,10 @@ public class Analyzer extends Verticle {
           secData.putNumber("active", active);
           secData.putNumber("done", done);
           data.addObject(secData);
-//          System.out.println(sec+": active:"+active+"  done: "+done);            
         }
-        eb.send("reqs.recent.report", data);
+        eb.send("reqs.report", new JsonObject().putArray("data", data));
       }
     }); 
-
 
     eb.registerHandler("reqs.start", new Handler<Message<JsonObject>>() {
       public void handle(Message<JsonObject> msg) {
