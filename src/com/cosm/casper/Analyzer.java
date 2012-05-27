@@ -61,7 +61,6 @@ public class Analyzer extends Verticle {
           Map<String, JsonObject> secReqs = reqs.get(sec);
           if (secReqs != null) {
             for (JsonObject reqInfo: secReqs.values()) {
-              System.out.println(reqInfo);
               if (reqInfo.getField("status") == null) {
                 active++;
               } else {
@@ -89,7 +88,6 @@ public class Analyzer extends Verticle {
           reqs.put(sec, secReqs);
         }
         secReqs.put(reqInfo.getString("uid"), reqInfo);
-        System.out.println("request start: "+msg.body);
       }
     });
 
@@ -101,7 +99,6 @@ public class Analyzer extends Verticle {
         if (secReqs != null) {
           secReqs.put(reqInfo.getString("uid"), reqInfo);
         }
-        System.out.println("request finish: "+reqInfo);
       }
     });
   }
