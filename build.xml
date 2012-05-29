@@ -6,7 +6,7 @@
 
   <property name="src" value="src"/>
   <property name="output" value="classes"/>
-  <property name="libs" value="../../vert.x-1.0.final/lib/jars"/>
+  <property name="libs" value="../../vert.x-1.0.1.final/lib/jars"/>
 
   <path id="compile-classpath">
     <fileset dir="${libs}">
