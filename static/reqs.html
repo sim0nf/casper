@@ -1,6 +1,8 @@
 <html><head><title>Recent Requests</title></head><body>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
 <script type="text/javascript" src="http://d3js.org/d3.v2.js"></script>
+<script src="http://cdn.sockjs.org/sockjs-0.2.1.min.js"></script>
+<script type="text/javascript" src="vertxbus.js"></script>
 
 <style type="text/css">
 </style>
@@ -9,11 +11,29 @@
 <script type="text/javascript">
 $(document).ready(function() {
 
+eb = new vertx.EventBus("http://localhost:8081/eventbus");
+
+      eb.onopen = function() {
+        console.log("connected");
+        eb.registerHandler("reqs.report", function(msg, replyTo) {
+          console.log(msg);
+          refresh(msg.data);
+        });
+      };
+
+      eb.onclose = function() {
+        console.log("disconnected");
+        eb = null;
+      };
+
+
 var svg = d3.select("#graph1")
   .append("svg")
     .attr("width", 960)
     .attr("height", 500);
 
+function refresh(data) {
+/*
 var data = [ 
   { time: 1, done: 10, active: 2 },
   { time: 2, done: 11, active: 4 },
@@ -27,15 +47,15 @@ var data = [
   { time: 10, done: 14, active: 9 },
   { time: 11, done: 14, active: 5 },
 ];
-
+*/
 var stack = d3.layout.stack()(["done", "active"].map(function(state) {
-  return data.map(function(d) {
-    return { x: d.time, y: +d[state] };
+  return data.map(function(d, i) {
+    return { x: i, y: +d[state] };
   }); 
 }));
 
-var x = d3.scale.linear().domain([1,11]).range([100,900]);
-var y = d3.scale.linear().domain([0,30]).range([500,0]);
+var x = d3.scale.linear().domain([1,30]).range([100,900]);
+var y = d3.scale.linear().domain([0,100]).range([500,0]);
 var z = d3.scale.ordinal().range(["lightpink", "darkgray", "lightblue"]);
 
 var layers = svg.selectAll("g.sec")
@@ -51,7 +71,7 @@ layers.selectAll("rect")
     .attr("y", function(d) { return y(d.y); })
     .attr("width", function(d) { return 10; })
     .attr("height", function(d) { return (y(d.y0) - y(d.y+d.y0)); });
-
+}
 
 });
 </script>

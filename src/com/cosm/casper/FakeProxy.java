@@ -25,7 +25,7 @@ public class FakeProxy extends Verticle {
         reqInfo.putString("uid", "x"+(new Random().nextLong()));
         vertx.eventBus().send("reqs.start", reqInfo);	
         
-        long delay = 75;
+        long delay = 3000;
         vertx.setTimer(delay, new Handler<Long>() {
           public void handle (Long timerID) {
             reqInfo.putNumber("elapsedTime", System.currentTimeMillis() - reqInfo.getNumber("startTime").longValue());
