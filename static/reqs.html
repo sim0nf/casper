@@ -1,0 +1,59 @@
+<html><head><title>Recent Requests</title></head><body>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.4.4/jquery.min.js"></script> 
+<script type="text/javascript" src="http://d3js.org/d3.v2.js"></script>
+
+<style type="text/css">
+</style>
+
+<div id="graph1"></div>
+<script type="text/javascript">
+$(document).ready(function() {
+
+var svg = d3.select("#graph1")
+  .append("svg")
+    .attr("width", 960)
+    .attr("height", 500);
+
+var data = [ 
+  { time: 1, done: 10, active: 2 },
+  { time: 2, done: 11, active: 4 },
+  { time: 3, done: 10, active: 2 },
+  { time: 4, done: 12, active: 5 },
+  { time: 5, done: 10, active: 2 },
+  { time: 6, done: 14, active: 7 },
+  { time: 7, done: 5, active: 2 },
+  { time: 8, done: 6, active: 3 },
+  { time: 9, done: 7, active: 1 },
+  { time: 10, done: 14, active: 9 },
+  { time: 11, done: 14, active: 5 },
+];
+
+var stack = d3.layout.stack()(["done", "active"].map(function(state) {
+  return data.map(function(d) {
+    return { x: d.time, y: +d[state] };
+  }); 
+}));
+
+var x = d3.scale.linear().domain([1,11]).range([100,900]);
+var y = d3.scale.linear().domain([0,30]).range([500,0]);
+var z = d3.scale.ordinal().range(["lightpink", "darkgray", "lightblue"]);
+
+var layers = svg.selectAll("g.sec")
+  .data(stack)
+  .enter().append("svg:g")
+    .attr("class", "sec")
+    .style("fill", function(d, i) { return z(i); });
+    
+layers.selectAll("rect")
+  .data(Object)
+  .enter().append("svg:rect")
+    .attr("x", function(d) { return x(d.x); })
+    .attr("y", function(d) { return y(d.y); })
+    .attr("width", function(d) { return 10; })
+    .attr("height", function(d) { return (y(d.y0) - y(d.y+d.y0)); });
+
+
+});
+</script>
+</body>
+</html>

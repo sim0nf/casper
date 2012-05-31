@@ -18,8 +18,11 @@ public class SockGuy extends Verticle {
     server.requestHandler(new Handler<HttpServerRequest>() {
       public void handle(HttpServerRequest req) {
         System.out.println("req: "+req.path);
-        if (req.path.equals("/")) req.response.sendFile("index.html");
-        if (req.path.equals("/vertxbus.js")) req.response.sendFile("vertxbus.js");
+        String filename = req.path;
+        if (filename.equals("/")) {
+          filename = "/index.html";
+        }
+        req.response.sendFile("static"+filename);
       }
     });
 
