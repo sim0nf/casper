@@ -33,44 +33,48 @@ var svg = d3.select("#graph1")
     .attr("height", 500);
 
 function refresh(data) {
-/*
-var data = [ 
-  { time: 1, done: 10, active: 2 },
-  { time: 2, done: 11, active: 4 },
-  { time: 3, done: 10, active: 2 },
-  { time: 4, done: 12, active: 5 },
-  { time: 5, done: 10, active: 2 },
-  { time: 6, done: 14, active: 7 },
-  { time: 7, done: 5, active: 2 },
-  { time: 8, done: 6, active: 3 },
-  { time: 9, done: 7, active: 1 },
-  { time: 10, done: 14, active: 9 },
-  { time: 11, done: 14, active: 5 },
-];
-*/
-var stack = d3.layout.stack()(["done", "active"].map(function(state) {
+
+var stack = d3.layout.stack().offset("expand")(["2xx", "3xx", "4xx", "5xx", "active", "done"].map(function(state) {
   return data.map(function(d, i) {
-    return { x: i, y: +d[state] };
+    return { x: i, y: +d[state], t: d.time };
   }); 
 }));
 
-var x = d3.scale.linear().domain([1,30]).range([100,900]);
-var y = d3.scale.linear().domain([0,100]).range([500,0]);
-var z = d3.scale.ordinal().range(["lightpink", "darkgray", "lightblue"]);
+var x = d3.scale.linear().domain([1,30]).range([-50,600]);
+var y = d3.scale.linear().domain([0,1]).range([500,0]);
+
+var z = d3.scale.category20();
 
 var layers = svg.selectAll("g.sec")
-  .data(stack)
+  .data(stack);
+
+layers
   .enter().append("svg:g")
     .attr("class", "sec")
     .style("fill", function(d, i) { return z(i); });
     
-layers.selectAll("rect")
-  .data(Object)
-  .enter().append("svg:rect")
+var bars = layers.selectAll("rect")
+  .data(Object, function(d) { return d.t; });
+
+function bar(sel) {
+  sel
     .attr("x", function(d) { return x(d.x); })
-    .attr("y", function(d) { return y(d.y); })
-    .attr("width", function(d) { return 10; })
+    .attr("y", function(d) { return y(d.y+d.y0); })
+    .attr("width", function(d) { return 22; })
     .attr("height", function(d) { return (y(d.y0) - y(d.y+d.y0)); });
+}
+
+bars
+  .enter().append("svg:rect")
+  .call(bar);
+
+bars
+    .transition()
+    .duration(1000)
+    .ease("linear")
+    .call(bar);
+
+bars.exit().remove();
 }
 
 });

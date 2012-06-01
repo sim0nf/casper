@@ -58,6 +58,10 @@ public class Analyzer extends Verticle {
         for (long sec = first; sec < first + (30 * 1000); sec += 1000) {
           int active = 0;
           int done = 0;
+          int sc_2xx = 0;
+          int sc_3xx = 0;
+          int sc_4xx = 0;
+          int sc_5xx = 0;
           Map<String, JsonObject> secReqs = reqs.get(sec);
           if (secReqs != null) {
             for (JsonObject reqInfo: secReqs.values()) {
@@ -65,6 +69,11 @@ public class Analyzer extends Verticle {
                 active++;
               } else {
                 done++;
+                int status = reqInfo.getNumber("status").intValue();
+                if (status >= 200 && status < 300) sc_2xx++;
+                if (status >= 300 && status < 400) sc_3xx++;
+                if (status >= 400 && status < 500) sc_4xx++;
+                if (status >= 500 && status < 600) sc_5xx++;
               }
             }
           }
@@ -72,6 +81,10 @@ public class Analyzer extends Verticle {
           secData.putNumber("time", sec);
           secData.putNumber("active", active);
           secData.putNumber("done", done);
+          secData.putNumber("2xx", sc_2xx);
+          secData.putNumber("3xx", sc_3xx);
+          secData.putNumber("4xx", sc_4xx);
+          secData.putNumber("5xx", sc_5xx);
           data.addObject(secData);
         }
         eb.send("reqs.report", new JsonObject().putArray("data", data));
